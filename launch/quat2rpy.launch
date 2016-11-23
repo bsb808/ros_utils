@@ -1,0 +1,9 @@
+<launch>
+
+<node pkg="ros_utils" type="quat2rpy.py" name="q2e" output="screen">
+      <param name="output_topic" value="pubtopic" />      
+      <param name="input_topic" value="/gazebo/model_states" />      
+      <param name="modelstates_index" value="1" type="int" />
+</node>
+
+</launch>

@@ -1,0 +1,14 @@
+<launch>
+
+<node pkg="ros_utils" type="msg2msg.py" name="msg2msg" output="screen">
+      <param name="input_topic" value="subtopic" />      
+      <param name="input_msg_package" value="std_msgs" />      
+      <param name="input_msg_type" value="Float32" />      
+      <param name="input_msg_fields" value="data" />      
+      <param name="output_topic" value="pubtopic" />      
+      <param name="output_msg_package" value="std_msgs" />      
+      <param name="output_msg_type" value="Float32" />      
+      <param name="output_msg_fields" value="data" />      
+</node>
+
+</launch>
