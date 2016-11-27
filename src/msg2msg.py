@@ -3,11 +3,12 @@
 This utility node is meant to convert from a message (user-defined) 
 to a Float32 message for use with the Pid package with ROS.
 '''
-
+import sys
 import rospy
 
 import functools
 
+from std_msgs.msg import Float32
 
 def rsetattr(obj, attr, val):
     pre, _, post = attr.rpartition('.')
@@ -32,11 +33,17 @@ class Node():
         self.outmsg_fields = outmsg_fields
         
         
-    def callback(self,data):
-        # decode
-        val = rgetattr(data,inmsg_fields)
+    def callback(self,msg):
+        # Decode
+        val = float(rgetattr(msg,inmsg_fields))
+        #print 'val: '+str(val)
+        #print "out: "+outmsg_fields
+        # Encode
         rsetattr(self.pubmsg,outmsg_fields,val)
+        #now = rospy.get_rostime()
+        #print("%i %i"%(now.secs,now.nsecs))
         self.pub.publish(self.pubmsg)
+
 
 if __name__ == '__main__':
     
@@ -48,7 +55,7 @@ if __name__ == '__main__':
     inmsg_type = rospy.get_param('~input_msg_type','Float32')
     inmsg_fields = rospy.get_param('~input_msg_fields','data')
     
-    out_topic = rospy.get_param('~onput_topic','out_topic')
+    out_topic = rospy.get_param('~output_topic','out_topic')
     outmsg_pkg = rospy.get_param('~output_msg_package','std_msgs')
     outmsg_type = rospy.get_param('~output_msg_type','Float32')
     outmsg_fields = rospy.get_param('~output_msg_fields','data')
@@ -77,11 +84,13 @@ if __name__ == '__main__':
 
     # Validate that fields are setup correctly
     try:
-        testval = rgetattr(inmsg,inmsg_fields)
-        rsetattr(outmsg,outmsg_fields,testval)
+        testval = float(rgetattr(inmsg(),inmsg_fields))
+        testmsg = outmsg()
+        rsetattr(node.pubmsg,outmsg_fields,testval)
     except:
-        rospy.logerror("Problem encodind/decoding messages "
-                       "with specified types and fields!")
+        rospy.logerr("Problem encodind/decoding messages "
+                     "with specified types and fields!")
+        sys.exit()
     
     try:
         rospy.spin()

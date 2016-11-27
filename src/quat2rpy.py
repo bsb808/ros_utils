@@ -22,8 +22,11 @@ class Node():
         if (not (pose_index==None)):
             data = data[pose_index]
         if (not (mstates_index==None)):
-            data = data.pose[mstates_index]
-        
+            try:
+                data = data.pose[mstates_index]
+            except IndexError:
+                rospy.logwarn("Index error with ModelStates index!")
+                return
         q = (data.orientation.x,
              data.orientation.y,
              data.orientation.z,
