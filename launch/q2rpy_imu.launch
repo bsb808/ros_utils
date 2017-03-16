@@ -1,0 +1,9 @@
+<launch>
+
+<node pkg="ros_utils" type="quat2rpy.py" name="q2e_imu" output="screen">
+      <remap from="in_topic" to="imu/data" />
+      <remap from="out_topic" to="imu/data_rpy" />
+      <param name="input_msg_type" value="Imu" />      
+</node>
+
+</launch>

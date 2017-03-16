@@ -1,0 +1,9 @@
+<launch>
+
+<node pkg="ros_utils" type="quat2rpy.py" name="q2e" output="screen">
+      <remap from="in_topic" to="nav_odom" />
+      <remap from="out_topic" to="nav_rpy" />
+      <param name="input_msg_type" value="Odometry" />      
+</node>
+
+</launch>
