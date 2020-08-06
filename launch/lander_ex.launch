@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<launch>
+  
+<arg name="set_timeout" default="true"/>
+<arg name="timeout" default="5.0"/>
+    
+<include file="$(find gazebo_ros)/launch/empty_world.launch">
+  <arg name="use_sim_time" value="true"/>
+  <arg name="paused"       value="false"/>
+</include>
+
+<group if="$(arg set_timeout)">
+  <node name="lander" pkg="ros_utils" type="lander.py"
+	required="true"
+        output="screen">
+    <rosparam subst_value="true">
+      timeout: $(arg timeout)
+    </rosparam>
+  </node>
+</group>
+</launch>
