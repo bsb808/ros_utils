@@ -6,9 +6,10 @@ import argparse
 import logging
 import sys
 import os
+import numpy as np
 
 import rosbag
-
+import tf
 
 class Object(object):
     '''
@@ -16,7 +17,20 @@ class Object(object):
     '''
     pass
 
-
+class Euler(Object):
+    '''
+    Object for Euler angles
+    '''
+    def __init__(self,orient):
+        '''
+        Input is orientation message
+        '''
+        q = (orient.x, orient.y, orient.z, orient.w)
+        e = tf.transformations.euler_from_quaternion(q)
+        self.roll = e[0]
+        self.pitch = e[1]
+        self.yaw = e[2]
+        
 def get_msg_fields(msg):
     ign_list = ['header', 'deserialize','deserialize_numpy','serialize','serialize_numpy']
     good_types = [float,int]
@@ -107,19 +121,36 @@ def main(argv=None):
 
     data = Object()
     bag = rosbag.Bag(args.filename)
-    #for topic, msg, t in bag.read_messages(topics=['/cmd_vel', '/jacm_gps_dynamics']):
-    for topic, msg, t in bag.read_messages():
-        # If not already initialized
-        #field = topic.replace('/','')
-        field = topic
-        if not hasattr(data,field):
-            setattr(data, field, init_datastruct(msg))
-            
-        append_msg_data(getattr(data,field),t.to_sec(),msg)
+    for topic, msg, t in bag.read_messages(topics=['/gazebo/model_states']):
+        #from IPython import embed; embed()
+        for na, po, tw in zip(msg.name, msg.pose, msg.twist):
+            field = na+'_position'
+            if not hasattr(data,field):
+                setattr(data, field, init_datastruct(po.position))
+            append_msg_data(getattr(data,field),t.to_sec(),po.position)
 
+            field = na+'_euler'
+            e = Euler(po.orientation)
+            if not hasattr(data,field):
+                setattr(data, field, init_datastruct(e))
+            append_msg_data(getattr(data,field),t.to_sec(),e)
+
+            '''
+            field = n+'_vel'
+            if not hasattr(data,field):
+                setattr(data, field, init_datastruct(msg))
+            append_msg_data(getattr(data,field),t.to_sec(),v)
+            '''
 
     bag.close()
 
+
+    # Add a relative time for all fields
+    for k in data.__dict__.keys():
+        struct = getattr(data,k)
+        t = getattr(struct,'t')
+        setattr(struct,'t0',np.array(t)-t[0])
+    
     # Save
     pickle.dump(data, open(pfname,"w"))
                  
