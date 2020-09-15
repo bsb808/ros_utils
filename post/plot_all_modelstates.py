@@ -12,8 +12,10 @@ from bag2p import *
 from plot_vrx_utils import parse_bagname
 
 data = {}
-logdir = '/home/bsb/data/head_seas_001'
-logdir = '/home/bsb/data/beam_seas_000'
+
+# Use same data for either head_seas or beam_seas
+logdir = '/home/bsb/data/2020_08_25_head_seas_001'
+#logdir = '/home/bsb/data/2020_08_25_beam_seas_001'
 for f in os.listdir(logdir):
     if f.endswith(".p"):
         print ("Loading <%s>"%f)
@@ -62,20 +64,24 @@ clf()
 ax1 = subplot(1,1,1)
 color = 'tab:blue'
 
-ax1.plot(amp.amplitude, amp.pitch, 'o', label='Pitch')
-ax1.plot(amp.amplitude, amp.roll, 'o', label='Roll')
+wh = 2.0 * array(amp.amplitude)
+
+ax1.plot(wh, 180.0/pi*array(amp.pitch), 'o', label='Pitch')
+ax1.plot(wh, 180.0/pi*array(amp.roll), 'o', label='Roll')
 legend()
-xlabel('Wave Amplitude [m]')
-ax1.set_ylabel('Euler angle [rad]', color=color)
+xlabel('Wave Height [m]')
+ax1.set_ylabel('Euler angle [deg]', color=color)
 grid(True)
 ax1.set_ylim([0, ax1.get_ylim()[1]*1.0])
 ax1.set_title(os.path.split(logdir)[1])
+#ax1.set_title('Head Seas')
+ax1.set_title('Beam Seas')
 
 
 
 color = 'tab:red'
 ax2 = ax1.twinx()
-plot(amp.amplitude, amp.z, 'o', color=color, label='Heave')
+plot(wh, amp.z, 'o', color=color, label='Heave')
 legend(loc='center left')
 ax2.set_ylabel('Heave [m]', color=color)
 ax2.tick_params(axis='y', labelcolor=color)
@@ -85,3 +91,5 @@ ax2.set_ylim([0, ax2.get_ylim()[1]*1.1])
 
 show()
 
+
+#savefig(os.path.split(logdir)[1])
